@@ -15,6 +15,6 @@ if [ -d "$REPOS_DIR" ]; then
 fi
 
 svnadmin create "$REPOS_DIR"
-chown $APACHE:$APACHE -R "$REPOS_DIR"
+chown -R $APACHE:$APACHE "$REPOS_DIR"
 
 echo "Created $REPOS_DIR"
