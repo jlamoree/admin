@@ -2,11 +2,22 @@
 
 DICT=/usr/share/dict/words
 DELIM="."
-ROUNDS=2
+NUM=2
 WORDS=`cat $DICT | wc -l`
 BUF=""
 
-for I in `seq $ROUNDS`; do
+while getopts "d:n:" FLAG; do
+  case $FLAG in
+    "d")
+       DELIM=$OPTARG
+    ;;
+    "n")
+       NUM=$OPTARG
+    ;;
+  esac
+done
+
+for I in `seq $NUM`; do
   WORD=`perl -e "print int(rand($WORDS))"`
   test -n "$BUF" && BUF="${BUF}${DELIM}"
   BUF="${BUF}`head -n $WORD $DICT | tail -n 1`"
