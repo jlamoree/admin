@@ -1,5 +1,13 @@
 #!/bin/sh
 
+#
+# Script to create a set of random words from a dictionary file.
+# Install 'words.noarch' package for /usr/share/dict/words
+# Command line args:
+#   -d : Delimiter between words. Default is '.'. Ex: -d ' '
+#   -n : Number of words. Default is 2. Ex: -n 4
+#
+
 DICT=/usr/share/dict/words
 DELIM="."
 NUM=2
