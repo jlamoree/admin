@@ -56,3 +56,13 @@ if [ -n "$N" ]; then
   done
   echo
 fi
+
+#
+# Check the virtual mailbox storage directory
+#
+if [ ! -d /var/vmail/domains ]; then
+  mkdir -p /var/vmail/domains
+  chown -R vmail:vmail /var/vmail
+else
+  echo "The /var/vmail directory exists."
+fi
