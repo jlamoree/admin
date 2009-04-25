@@ -1,0 +1,11 @@
+blacklist is a script to make firewall rules easier to manage.
+
+To install the project, run the install script. See `install -h` for help.
+
+The main application should run well with the default options. See `blacklist -h` for help.
+
+A cron script is created by the installer (see /etc/cron.daily/blacklist), which will reload the rules and refresh the network data every Sunday.
+
+The project is released under the Apache 2.0 license, a copy of which is included as LICENSE.
+
+-joseph

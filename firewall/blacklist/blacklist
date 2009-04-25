@@ -3,6 +3,9 @@
 #
 # Script to insert blacklist rules into the firewall
 #
+# Copyright 2009 Lamoree Software
+# See http://www.lamoree.com/projects/blacklist/LICENSE
+#
 
 DATADIR=/etc/blacklist
 RULES=/etc/sysconfig/blacklist

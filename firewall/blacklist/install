@@ -2,7 +2,9 @@
 
 #
 # Script to install blacklist
-# The created cron files point to the correct script, however calls it with no options
+#
+# Copyright 2009 Lamoree Software
+# See http://www.lamoree.com/projects/blacklist/LICENSE
 #
 
 SCRIPTDIR=/usr/local/sbin
