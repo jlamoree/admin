@@ -10,6 +10,7 @@ URLPATH="http://www.ipdeny.com/ipblocks/data/countries"
 CRONFILE=/etc/cron.daily/blacklist
 LIST=no
 PURGE=no
+STATUS=no
 CHAIN=Blacklist
 TARGET=Blocked
 
@@ -19,7 +20,8 @@ function help {
   echo "  -h : Help (this message)."
   echo "  -i : Install rules and cron files. Create a data directory if needed."
   echo "  -l : List the chain rules when finished." 
-  echo "  -p : Purge and preload data files."
+  echo "  -p : Purge and preload data files, then exit."
+  echo "  -s : Show status of blacklist, then exit."
   echo "  -f : File containing rules. Default is /etc/sysconfig/blacklist"
   echo "  -d : Data directory. Default is /etc/blacklist"
   echo "  -u : URL to country files. Default is http://www.ipdeny.com/ipblocks/data/countries"
@@ -34,7 +36,7 @@ function error {
 }
 
 
-while getopts ":hilpf:d:u:" FLAG; do
+while getopts ":hilpsf:d:u:" FLAG; do
   case $FLAG in
     "h")
        help 
@@ -45,6 +47,9 @@ while getopts ":hilpf:d:u:" FLAG; do
     ;;
     "p")
        PURGE=yes
+    ;;
+    "s")
+       STATUS=yes
     ;;
     "f")
        RULES=$OPTARG
@@ -77,6 +82,14 @@ if [ "$PURGE" == "yes" ]; then
   wget -q -O all-zones.tar.gz "$URLPATH/all-zones.tar.gz"
   tar zxf all-zones.tar.gz
   echo "`ls -1 *.zone | wc -l` zone files loaded."
+  exit 0
+fi
+
+
+# Show status summary
+if [ "$STATUS" == "yes" ]; then
+  iptables -L $CHAIN -n -v | \
+    perl -ne 'END { printf "%d rules, %d pkts, %d bytes\n", $i, $p, $b } /^[\s\d]+/ || next; @f = split; $p += $f[0]; $b += $f[1]; $i++'
   exit 0
 fi
 
