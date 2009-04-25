@@ -93,9 +93,22 @@ if [ "$STATUS" == "yes" ]; then
   exit 0
 fi
 
+
 # Add an IP or network in CIDR format
 function block {
-  /sbin/iptables -t filter -I $CHAIN -p tcp -s $1 -j $TARGET
+  if echo $1 | grep -q -e ':'; then
+    IP=$( echo $1 | sed -e 's/:.*//')
+    PORT=$( echo $1 | sed -e 's/.*://')
+  else
+    IP=$1
+    PORT=0
+  fi
+
+  if [ $PORT -ne 0 ]; then  
+    /sbin/iptables -t filter -I $CHAIN -p tcp -s $IP -d 0/0 --dport $PORT -j $TARGET
+  else
+    /sbin/iptables -t filter -I $CHAIN -p tcp -s $IP -j $TARGET
+  fi
 }
 
 # Download a file from the URL path
@@ -107,8 +120,8 @@ function download {
 # Flush the chain
 /sbin/iptables -t filter -F $CHAIN
 
-# Read rules file for IPs
-for IP in `grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$' $RULES`; do 
+# Read rules file for IP and IP:PORT rules
+for IP in `grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(:[0-9]+)?$' $RULES`; do 
   block $IP
 done
 
