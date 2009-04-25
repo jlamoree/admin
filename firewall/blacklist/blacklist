@@ -1,0 +1,115 @@
+#!/bin/bash
+
+#
+# Script to insert blacklist rules into the firewall
+#
+
+DATADIR=/etc/blacklist
+RULES=/etc/sysconfig/blacklist
+URLPATH="http://www.ipdeny.com/ipblocks/data/countries"
+CRONFILE=/etc/cron.daily/blacklist
+LIST=no
+PURGE=no
+CHAIN=Blacklist
+TARGET=Blocked
+
+function help {
+  echo "Usage: `basename $0` [options]"
+  echo "Options:"
+  echo "  -h : Help (this message)."
+  echo "  -i : Install rules and cron files. Create a data directory if needed."
+  echo "  -l : List the chain rules when finished." 
+  echo "  -p : Purge and preload data files."
+  echo "  -f : File containing rules. Default is /etc/sysconfig/blacklist"
+  echo "  -d : Data directory. Default is /etc/blacklist"
+  echo "  -u : URL to country files. Default is http://www.ipdeny.com/ipblocks/data/countries"
+  echo "  -c : Cron filename."
+  echo 
+}
+
+function error {
+  echo "Error: $@"
+  echo "Use '`basename $0` -h' for help."
+  exit 1
+}
+
+
+while getopts ":hilpf:d:u:" FLAG; do
+  case $FLAG in
+    "h")
+       help 
+       exit 0
+    ;;
+    "l")
+       LIST=yes
+    ;;
+    "p")
+       PURGE=yes
+    ;;
+    "f")
+       RULES=$OPTARG
+    ;;
+    "d")
+       DATADIR=$OPTARG
+    ;;
+    "u")
+       URLPATH=$OPTARG
+    ;;
+    "c")
+       CRONFILE=$OPTARG
+    ;;
+    "?")
+       error "Invalid option '$OPTARG'"
+       exit 1
+    ;;
+  esac
+done
+
+# Verify installation
+test -f "$RULES" || error "Specified rules file ($RULES) not found."
+test -d "$DATADIR" || error "Specified data file directory ($DATADIR) does not exist."
+
+
+# Purge and preload data directory
+if [ "$PURGE" == "yes" ]; then
+  cd "$DATADIR"
+  rm -f *.zone *.txt *.tar.gz MD5SUM
+  wget -q -O all-zones.tar.gz "$URLPATH/all-zones.tar.gz"
+  tar zxf all-zones.tar.gz
+  echo "`ls -1 *.zone | wc -l` zone files loaded."
+  exit 0
+fi
+
+# Add an IP or network in CIDR format
+function block {
+  /sbin/iptables -t filter -I $CHAIN -p tcp -s $1 -j $TARGET
+}
+
+# Download a file from the URL path
+function download {
+  wget -q -O "${DATADIR}/${1}" "${URLPATH}/${1}"
+}
+
+
+# Flush the chain
+/sbin/iptables -t filter -F $CHAIN
+
+# Read rules file for IPs
+for IP in `grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$' $RULES`; do 
+  block $IP
+done
+
+# Read rules file for country codes
+for CC in `grep -E '^[a-z]{2}$' $RULES`; do 
+  if [ ! -f "${DATADIR}/${CC}.zone" ]; then
+    download "${CC}.zone"
+  fi
+  for CIDR in `cat "${DATADIR}/${CC}.zone"`; do
+    block $CIDR
+  done
+done
+
+# List the rules
+if [ $LIST == "yes" ]; then
+  /sbin/iptables -L $CHAIN -n -v
+fi

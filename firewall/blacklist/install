@@ -1,0 +1,117 @@
+#!/bin/bash
+
+#
+# Script to install blacklist
+# The created cron files point to the correct script, however calls it with no options
+#
+
+SCRIPTDIR=/usr/local/sbin
+DATADIR=/etc/blacklist
+RULES=/etc/sysconfig/blacklist
+CRONFILE=/etc/cron.daily/blacklist
+REPLACE=no
+
+function help {
+  echo "Usage: `basename $0` [options]"
+  echo "Options:"
+  echo "  -h : Help (this message)."
+  echo "  -r : Replace any existing files or directories."
+  echo "  -s : Script path. Default is /usr/local/sbin"
+  echo "  -f : File containing rules. Default is /etc/sysconfig/blacklist"
+  echo "  -d : Data directory. Default is /etc/blacklist"
+  echo "  -c : Cron filename. Default is /etc/cron.daily/blacklist"
+  echo 
+}
+
+function error {
+  echo "Error: $@"
+  echo "Use '`basename $0` -h' for help."
+  exit 1
+}
+
+
+while getopts ":hrs:f:d:c:" FLAG; do
+  case $FLAG in
+    "h")
+       help 
+       exit 0
+    ;;
+    "r")
+       REPLACE=yes
+    ;;
+    "s")
+       SCRIPTDIR=$OPTARG
+    ;;
+    "f")
+       RULES=$OPTARG
+    ;;
+    "d")
+       DATADIR=$OPTARG
+    ;;
+    "c")
+       CRONFILE=$OPTARG
+    ;;
+    "?")
+       error "Invalid option '$OPTARG'"
+       exit 1
+    ;;
+  esac
+done
+
+# Expect script to be in the same directory as installer
+D=`dirname $0`
+if [ ! -f "$D/blacklist" ]; then
+  error "This installation script expects the application script to be in same directory."
+else
+  if [ -f "$SCRIPTDIR/blacklist" -a "$REPLACE" == "no" ]; then
+    echo "An existing script file ($SCRIPTDIR/blacklist) exists and will not be replaced."
+  elif [ ! -f "$SCRIPTDIR/blacklist" -o "$REPLACE" == "yes" ]; then
+    test -f "$SCRIPTDIR/blacklist" && rm -f "$SCRIPTDIR/blacklist"
+    cp "$D/blacklist" "$SCRIPTDIR"
+    chmod 500 "$SCRIPTDIR/blacklist"
+  fi
+fi
+
+# Sample rules file
+if [ -f "$RULES" -a "$REPLACE" == "no" ]; then
+  echo "An existing rules file ($RULES) exists and will not be replaced."
+else
+  echo -e "# \$Id\$\n\n# Blocked IPs\n#1.2.3.4\n#5.6.7.8\n\n# Blocked countries\n#xx\n#yy" > "$RULES"
+  chmod 600 "$RULES"
+fi
+
+# Verify data directory
+if [ -d "$DATADIR" -a "$REPLACE" == "no" ]; then
+  echo "An existing data directory ($DATADIR) exists and will not be modified."
+else
+  test -d "$DATADIR" && rm -rf "$DATADIR"
+  mkdir "$DATADIR"
+  chmod 700 "$DATADIR"
+fi
+
+# Create a cron file with correct path and options
+if [ -f "$CRONFILE" -a "$REPLACE" == "no" ]; then
+  echo "An existing cron file ($CRONFILE) exists and will not be replaced."
+else
+  cat > "$CRONFILE" <<-EOF
+	#!/bin/bash
+	
+	LOCKFILE=/var/lock/blacklist
+	
+	[ -f \$LOCKFILE ] && exit 0
+	trap "{ rm -f \$LOCKFILE ; exit 255; }" EXIT
+	touch \$LOCKFILE
+	
+	# Purge and preload every Sunday
+	[ "\`date +%w\`" == "0" ] && "${SCRIPTDIR}/blacklist -p"
+	
+	# Run the blacklist loader
+	"${SCRIPTDIR}/blacklist" -d "$DATADIR" -f "$RULES"
+	exit 0
+	EOF
+  chmod 500 "$CRONFILE"
+fi
+
+echo "Done!"
+echo
+
