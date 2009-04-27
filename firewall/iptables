@@ -1,0 +1,41 @@
+# $Id$
+
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+
+:Blacklist - [0:0]
+
+:Blocked - [0:0]
+-A Blocked -p tcp -j LOG --log-prefix "Blocked: "
+-A Blocked -j DROP
+
+:Firewall - [0:0]
+-A INPUT -j Firewall
+-A FORWARD -j Firewall
+-A Firewall -i lo -j ACCEPT
+-A Firewall -p icmp --icmp-type any -j ACCEPT
+
+# Shortcut existing sessions
+-A Firewall -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# Blacklist Scan
+-A Firewall -p tcp -j Blacklist
+
+# Services
+#-A Firewall -m tcp -p tcp --dport 22 -j ACCEPT
+#-A Firewall -m tcp -p tcp --dport 25 -j ACCEPT
+#-A Firewall -m tcp -p tcp --dport 110 -j ACCEPT
+#-A Firewall -m tcp -p tcp --dport 143 -j ACCEPT
+#-A Firewall -m tcp -p tcp --dport 443 -j ACCEPT
+#-A Firewall -m tcp -p tcp --dport 587 -j ACCEPT
+#-A Firewall -m tcp -p tcp --dport 636 -j ACCEPT
+#-A Firewall -m tcp -p tcp --dport 993 -j ACCEPT
+#-A Firewall -m tcp -p tcp --dport 995 -j ACCEPT
+#-A Firewall -m tcp -p tcp --dport 10022 -j ACCEPT
+
+# Default deny
+-A Firewall -j REJECT --reject-with icmp-host-prohibited
+
+COMMIT
