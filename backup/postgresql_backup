@@ -14,9 +14,9 @@
 ############################################################################
 
 BU_DIR="/root/backups/postgresql/`date +%Y-%m-%d`"
-BU_OVERWRITE=1
 BU_USER="postgres"
 BU_PGDUMP=/usr/bin/pg_dumpall
+BU_OVERWRITE=0
 
 umask 0077
 
