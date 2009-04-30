@@ -1,0 +1,41 @@
+#!/bin/sh
+
+############################################################################
+# PostgreSQL Backup Script
+#
+# This script will use pg_dumpall to create archives of all the databases
+#
+# To install, set the BU_DIR directory prefix.
+# Verify the ~/.pg_pass
+#
+# author: Joseph Lamoree <joseph@lamoree.com>
+# date: 2006/11/29
+# version: 1.1
+############################################################################
+
+BU_DIR="/root/backups/postgresql/`date +%Y-%m-%d`"
+BU_OVERWRITE=1
+BU_USER="postgres"
+BU_PGDUMP=/usr/bin/pg_dumpall
+
+umask 0077
+
+# Verify backup location
+if [ ! -d `dirname $BU_DIR` ]; then
+  echo "$0: Backup directory '`dirname $BU_DIR`' does not exist."
+  exit 1
+fi
+if [ -d $BU_DIR ]; then
+  if [ $BU_OVERWRITE -eq 0 ]; then
+    echo "$0: Backup directory ($BU_DIR) already exists, and BU_OVERWRITE is off."
+    exit 1
+  else
+    rm -rf $BU_DIR
+  fi
+fi
+
+# Create the backup directory
+mkdir $BU_DIR  
+
+# Run the backup as the BU_USER
+su -l $BU_USER -s /bin/sh -c "$BU_PGDUMP --no-owner --no-acl" | gzip > "$BU_DIR/pg_dumpall.`date +%Y-%m-%d`.gz"
