@@ -56,12 +56,12 @@ public class TrackerScraper {
 		System.out.println("Scrape URL: " + u);
 
 		// Connect to the tracker
-    URLConnection uc = u.openConnection();
-    uc.connect();
-    InputStream is = uc.getInputStream();
+		URLConnection uc = u.openConnection();
+		uc.connect();
+		InputStream is = uc.getInputStream();
 
 		// Parse the response
-    try {
+		try {
 			BDecoder decoder = new BDecoder(is);
 			Map root = decoder.bdecodeMap().getMap();
 			BEValue files = (BEValue) root.get("files");
@@ -100,35 +100,32 @@ public class TrackerScraper {
 	private static String createScrapeURL(MetaInfo meta) {
 		String u = meta.getAnnounce().replaceAll("announce", "scrape");
 		String info_hash = urlEncode(meta.getInfoHash());
-
-			String result = u + "?info_hash=" + info_hash;
-			return result;
+		return u + "?info_hash=" + info_hash;
 	}
 
-
 	private static String urlEncode(byte[] ba) {
-    StringBuffer sb = new StringBuffer(ba.length * 3);
-    for (byte b : ba) {
-      int c = b & 0xFF;
-      sb.append('%');
-      if (c < 16) {
-        sb.append('0');
-      }
-      sb.append(Integer.toHexString(c));
-    }
-    return sb.toString();
+		StringBuffer sb = new StringBuffer(ba.length * 3);
+		for (byte b : ba) {
+			int c = b & 0xFF;
+			sb.append('%');
+			if (c < 16) {
+				sb.append('0');
+			}
+			sb.append(Integer.toHexString(c));
+		}
+		return sb.toString();
 	}
 
 	private static String hexEncode(byte[] ba) {
-    StringBuffer sb = new StringBuffer(ba.length * 2);
-    for (byte b : ba) {
-      int c = b & 0xFF;
-      if (c < 16) {
-        sb.append('0');
-      }
-      sb.append(Integer.toHexString(c));
-    }
-    return sb.toString();
-  }
+		StringBuffer sb = new StringBuffer(ba.length * 2);
+		for (byte b : ba) {
+			int c = b & 0xFF;
+			if (c < 16) {
+				sb.append('0');
+			}
+			sb.append(Integer.toHexString(c));
+		}
+		return sb.toString();
+	}
 
 }
