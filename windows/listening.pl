@@ -22,7 +22,7 @@ foreach $_ (split(/\n/, $buffer)) {
     /^\w?\s+?(\d+)\s+/;
     $procs{$1} = "Windows System Process";
   } elsif (/^\w?\s+\d+\s+/) {
-    /^\w?\s+?(\d+)\s+([\d\?]+)\s+([\d:]{8})\s+(.*)/;
+    /^\w?\s+?(\d+)\s+([\w\?]+)\s+([\d:]{8})\s+(.*)/;
     $procs{$1} = $4;
   }
 }
