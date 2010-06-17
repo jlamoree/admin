@@ -61,8 +61,8 @@ fi
 md5 -r "$ARCHIVE"
 if [ "$MINIMAL" == "yes" ]; then
   unzip -qq -j -d "$WORK" "$ARCHIVE" WEB-INF/lib/OpenBlueDragon.jar
-	unzip -qq -c "$WORK/OpenBlueDragon.jar" openbd.properties
-	mv -f "$WORK/OpenBlueDragon.jar" "$DEPLOY/$CONTEXT/WEB-INF/lib/OpenBlueDragon.jar"
+  unzip -qq -c "$WORK/OpenBlueDragon.jar" openbd.properties
+  mv -f "$WORK/OpenBlueDragon.jar" "$DEPLOY/$CONTEXT/WEB-INF/lib/OpenBlueDragon.jar"
   echo "Finished a minimal update by replacing the OpenBlueDragon.jar file."
 else
   unzip -qq -d "$WORK" "$ARCHIVE"
