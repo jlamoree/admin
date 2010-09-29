@@ -16,6 +16,11 @@ function error {
   exit 1
 }
 
+# Check that the current user has permission to the certificates
+if [ ! -r "$CA_PRIVATE" ]; then
+  error "The CA directory ($CA_PRIVATE) is not accessible by user `whoami`"
+fi
+
 # Check that the cert exists
 if [ "$CRT_FILE" == "_" ]; then
   error "The certificate file is a required argument."

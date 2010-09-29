@@ -63,7 +63,7 @@ CA_NEXTVAL=`wc -l < "$CA_SERIAL"`
 echo
 echo "Generating the certificate authority private key."
 echo "-------------------------------------------------"
-openssl genrsa -des3 -out "$CA_PRIVATE/$CA_NAME.key" 1024
+openssl genrsa -des3 -out "$CA_PRIVATE/$CA_NAME.key" 2048
 chmod 400 "$CA_PRIVATE/$CA_NAME.key"
 
 # Create the self-signed CA certificate

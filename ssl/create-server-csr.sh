@@ -41,7 +41,7 @@ if [ "$KEY_REQD" == "yes" ]; then
   echo
   echo "Generating the private server key."
   echo "----------------------------------"
-  openssl genrsa -out "$KEY_FILE" 1024
+  openssl genrsa -out "$KEY_FILE" 2048
   chmod 440 "$KEY_FILE"
 fi
 
