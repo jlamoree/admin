@@ -21,6 +21,11 @@ function error {
   exit 1
 }
 
+# Check that the current user has permission to the certificates
+if [ ! -r "$CA_PRIVATE" ]; then
+  error "The CA directory ($CA_PRIVATE) is not accessible by user `whoami`"
+fi
+
 # Verify the server key file
 if [ ! -r "$KEY_FILE" ]; then
   KEY_REQD="yes"

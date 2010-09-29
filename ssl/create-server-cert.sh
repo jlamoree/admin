@@ -30,6 +30,11 @@ function error {
   exit 1
 }
 
+# Check that the current user has permission to the certificates
+if [ ! -r "$CA_PRIVATE" ]; then
+  error "The CA directory ($CA_PRIVATE) is not accessible by user `whoami`"
+fi
+
 # Validate CA files
 if [ ! -r "$CA_KEY_FILE" ]; then
   error "The CA private key ($CA_KEY_FILE) is not found."
