@@ -6,13 +6,13 @@
 SSL_PRIVATE="/etc/pki/tls/private"
 SSL_PUBLIC="/etc/pki/tls/certs"
 
-KEY_NAME=${1:-"localhost"}
+KEY_NAME="$1"
 KEY_FILE="$SSL_PRIVATE/$KEY_NAME.key"
 KEY_REQD="no"
 CERT_CSR=`mktemp`
 
 function usage {
-  echo "Usage: `basename $0` [key_name]"
+  echo "Usage: `basename $0` key_name"
 }
 
 function error {
@@ -20,6 +20,11 @@ function error {
   usage
   exit 1
 }
+
+# Verify key_name
+if [ "$KEY_NAME" == "" ]; then
+  error "The key_name argument was not provided."
+fi
 
 # Check that the current user has permission to the certificates
 if [ ! -r "$CA_PRIVATE" ]; then
