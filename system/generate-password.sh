@@ -6,6 +6,7 @@
 # Command line args:
 #   -d : Delimiter between words. Default is '.'. Ex: -d ' '
 #   -n : Number of words. Default is 2. Ex: -n 4
+#   -i : Iterations. Default is zero, which means infinite
 #
 
 DICT=/usr/share/dict/words
@@ -14,13 +15,16 @@ NUM=2
 WORDS=`cat $DICT | wc -l`
 BUF=""
 
-while getopts "d:n:" FLAG; do
+while getopts "d:n:i:" FLAG; do
   case $FLAG in
     "d")
        DELIM=$OPTARG
     ;;
     "n")
        NUM=$OPTARG
+    ;;
+    "i")
+       ITERS=$OPTARG
     ;;
   esac
 done
