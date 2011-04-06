@@ -117,7 +117,7 @@ tar -z -c -C "$WEBAPP_ROOT" -f "$BACKUP" \
 echo "Replacing the hotfix application files."
 unzip -o -qq $WORK_DIR/CF901/CFIDE.zip -d "$WEBAPP_ROOT"
 unzip -o -qq $WORK_DIR/CF901/WEB-INF.zip -d "$WEBAPP_ROOT"
-find $WORK_DIR/CF901/lib -type f | xargs -i cp {} "$WEBAPP_ROOT/WEB-INF/cfusion/lib"
+find $WORK_DIR/CF901/lib -maxdepth 1 -type f | xargs -i cp {} "$WEBAPP_ROOT/WEB-INF/cfusion/lib"
 
-echo -e "Finished!\n"
+echo "Finished!"
 exit 0
