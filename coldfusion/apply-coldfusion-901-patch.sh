@@ -94,11 +94,7 @@ echo "Creating a backup of existing ColdFusion files as $BACKUP"
 tar -z -c -C "$WEBAPP_ROOT" -f "$BACKUP" \
   CFIDE/administrator CFIDE/componentutils CFIDE/wizards \
   WEB-INF/debug WEB-INF/exception \
-  WEB-INF/cfusion/lib/ESAPI.properties \
-  WEB-INF/cfusion/lib/log4j.properties \
-  WEB-INF/cfusion/lib/validation.properties \
-  WEB-INF/cfusion/lib/commons-fileupload-1.2.jar \
-  WEB-INF/cfusion/lib/esapi-2.0_rc10.jar
+  WEB-INF/cfusion/lib/log4j.properties
 
 # Patch the instance application files
 echo "Replacing the hotfix application files."
