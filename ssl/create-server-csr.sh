@@ -27,8 +27,8 @@ if [ "$KEY_NAME" == "" ]; then
 fi
 
 # Check that the current user has permission to the certificates
-if [ ! -r "$CA_PRIVATE" ]; then
-  error "The CA directory ($CA_PRIVATE) is not accessible by user `whoami`"
+if [ ! -r "$SSL_PRIVATE" ]; then
+  error "The SSL directory ($SSL_PRIVATE) is not accessible by user `whoami`"
 fi
 
 # Verify the server key file
@@ -38,6 +38,15 @@ if [ ! -r "$KEY_FILE" ]; then
   echo
   if [ $REPLY != "y" -a $REPLY != "Y" ]; then
     error "Cannot continue without a server key."
+  fi
+else
+  read -n 1 -p "The server key ($KEY_FILE) exists. Do you want to use it? (y/n): "
+  echo
+  if [ $REPLY != "y" -a $REPLY != "Y" ]; then
+    KEY_REQD="yes"
+    cat $KEY_FILE >> $KEY_FILE.archive
+    echo "Previous key archived as $KEY_FILE.archive"
+    chmod 400 "$KEY_FILE.archive"
   fi
 fi
 
