@@ -2,6 +2,7 @@
 
 #
 # The following is specific to ColdFusion 9.01 installed in multiserver configuration.
+# Requires Cygwin with curl (if hotfix is not local), unzip, sha1sum (included in coreutils), and tar
 #
 
 INSTANCE="$1"
@@ -10,8 +11,7 @@ HOTFIX_URL="http://kb2.adobe.com/cps/890/cpsid_89094/attachments/CF901.zip"
 HOTFIX_SHA1="ad76e1e7e40501d18e71d4d344125dee7f8a5361"
 
 function usage {
-  echo "Usage: `basename $0` instance patch"
-  echo
+  echo -e "Usage: `basename $0` instance [hotfix]\n"
 }
 
 function error {
@@ -20,14 +20,10 @@ function error {
   exit 1
 }
 
-# Validate that both arguments are provided
+# Validate the instance name
 if [ "$INSTANCE" == "" ]; then
   error "The ColdFusion instance name within the JRun servers directory must be specified."
 fi
-if [ "$HOTFIX" == "" ]; then
-  error "The ColdFusion Hotfix zip file must be specified."
-fi
-
 
 if [ "$JRUN_HOME" == "" ]; then
   for D in /cygdrive/d/JRun4 /cygdrive/d/cf9/JRun4 /cygdrive/c/JRun4; do
@@ -58,14 +54,35 @@ else
   error "The specified instance does not appear to contain a ColdFusion web application: $DEPLOY_ROOT"
 fi
 
+WORK_DIR=`mktemp -d`
+
+# If the hotfix is not specified, try to fetch from Adobe
+if [ "$HOTFIX" == "" ]; then
+  HOTFIX=$WORK_DIR/CF901.zip
+  echo "Downloading the ColdFusion Hotfix file."
+  curl -s -o $HOTFIX "$HOTFIX_URL"
+  if [ $? != 0 ]; then
+    error "The ColdFusion Hotfix file could not be downloaded."
+  fi
+fi
+
 # Check that the hotfix exists and verify the file.
 if [ ! -f "$HOTFIX" ]; then
   error "The ColdFusion Hotfix file was not found: $HOTFIX"
 elif [ $HOTFIX_SHA1 != `sha1sum "$HOTFIX" | cut -f 1 -d ' '` ]; then
   error "The ColdFusion Hotfilx verification failed; correct SHA1 hash is $HOTFIX_SHA1"
 fi
-WORK_DIR=`mktemp -d`
+echo "The ColdFusion Hotfix zip file has the correct SHA1 hash."
 unzip -qq -d $WORK_DIR "$HOTFIX"
+
+# Ready to patch
+echo "The ColdFusion Hotfix is ready to be applied."
+read -n 1 -p "The server should be stopped before continuing. Ready? (y/n): "
+echo
+if [ $REPLY != "y" -a $REPLY != "Y" ]; then
+  echo -e "Exiting before making any changes.\n"
+  exit 0
+fi
 
 # Test for existing hotfix jar
 REPLACE=0
@@ -102,6 +119,5 @@ unzip -o -qq $WORK_DIR/CF901/CFIDE.zip -d "$WEBAPP_ROOT"
 unzip -o -qq $WORK_DIR/CF901/WEB-INF.zip -d "$WEBAPP_ROOT"
 find $WORK_DIR/CF901/lib -type f | xargs -i cp {} "$WEBAPP_ROOT/WEB-INF/cfusion/lib"
 
-echo "Finished!"
-echo 
+echo -e "Finished!\n"
 exit 0
