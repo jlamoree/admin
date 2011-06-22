@@ -43,8 +43,8 @@ elif [ ! -r "$CA_CERT_FILE" ]; then
 fi
 
 # Validate the CA serial number file
-if [ ! -r "$CA_SERIAL_FILE" -o ! -w "$CA_SERIAL_FILE" ]; then
-  error "The CA serial number file ($CA_SERIAL_FILE) exists, but cannot be read and written."         
+if [ ! -e "$CA_SERIAL_FILE" ]; then
+  error "The CA serial number file ($CA_SERIAL_FILE) does not exist."         
 fi
 
 # Verify the server key file
@@ -72,7 +72,9 @@ if [ "$KEY_REQD" == "yes" ]; then
 fi
 
 # Get next serial number
-date >> "$CA_SERIAL_FILE"
+chmod 600 "$CA_SERIAL_FILE"
+echo -e "`date`\t$CERT_CERT_FILE" >> "$CA_SERIAL_FILE"
+chmod 400 "$CA_SERIAL_FILE"
 CA_SERIAL_NEXTVAL=`wc -l < "$CA_SERIAL_FILE"`
 
 # Create the CSR and certificate
