@@ -14,7 +14,7 @@ REMOTE_USER="`/usr/bin/whoami`"
 REMOTE_HOST="${!#}"
 REMOTE_PORT=22
 REPLACE="no"
-KEY_TYPE="dsa"
+KEY_TYPE="rsa"
 
 function help {
   echo "Usage: `basename $0` [options] host"
@@ -70,12 +70,12 @@ fi
 
 # Set key type
 if [ "$KEY_TYPE" == "dsa" ]; then
-  SSH_PUBLIC_KEY="id_dsa"
-  SSH_PRIVATE_KEY="id_dsa.pub"
+  SSH_PUBLIC_KEY="id_dsa.pub"
+  SSH_PRIVATE_KEY="id_dsa"
   echo "Key type is DSA"
 elif [ "$KEY_TYPE" = "rsa" ]; then
-  SSH_PUBLIC_KEY="id_rsa"
-  SSH_PRIVATE_KEY="id_rsa.pub"
+  SSH_PUBLIC_KEY="id_rsa.pub"
+  SSH_PRIVATE_KEY="id_rsa"
   echo "Key type is RSA"
 else
   error "The key type specified is not supported."
