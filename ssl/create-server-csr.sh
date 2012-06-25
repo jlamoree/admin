@@ -22,8 +22,13 @@ function error {
 }
 
 # Check that the current user has permission to the certificates
-if [ ! -r "$CA_PRIVATE" ]; then
-  error "The CA directory ($CA_PRIVATE) is not accessible by user `whoami`"
+if [ ! -r "$SSL_PRIVATE" ]; then
+  error "The certificate directory ($SSL_PRIVATE) is not accessible by user `whoami`"
+fi
+
+# Check the key name
+if [ "$KEY_NAME" == "localhost" ]; then
+  error "The key name should be specified."
 fi
 
 # Verify the server key file
