@@ -74,6 +74,6 @@ chmod 400 "$CA_PRIVATE/$CA_NAME.key"
 echo
 echo "Signing the certificate authority key."
 echo "--------------------------------------"
-openssl req -new -x509 -days 365 -set_serial $CA_NEXTVAL \
+openssl req -new -x509 -days 1095 -set_serial $CA_NEXTVAL \
   -key "$CA_PRIVATE/$CA_NAME.key" -out "$CA_PUBLIC/$CA_NAME.crt"
 

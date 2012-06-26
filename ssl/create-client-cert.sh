@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Create a SSL/TLS certificate for an existing key using a local certificate authority
-# Usage: create-server-cert.sh ca_name key_name
+# Create a SSL/TLS certificate for a client using a local certificate authority
+# Usage: create-client-cert.sh ca_name key_name
 
 CA_PRIVATE="/etc/pki/CA/private"
 CA_PUBLIC="/etc/pki/CA"
@@ -19,6 +19,8 @@ KEY_FILE="$SSL_PRIVATE/$KEY_NAME.key"
 KEY_REQD="no"
 CERT_FILE="$SSL_PUBLIC/$KEY_NAME.crt"
 CERT_CSR=`mktemp`
+PKCS12_FILE="$SSL_PRIVATE/$KEY_NAME.p12"
+PEM_FILE="$SSL_PRIVATE/$KEY_NAME.pem"
 
 function usage {
   echo "Usage: `basename $0` [ca_name] [key_name]"
@@ -47,13 +49,13 @@ if [ ! -e "$CA_SERIAL_FILE" ]; then
   error "The CA serial number file ($CA_SERIAL_FILE) does not exist."         
 fi
 
-# Verify the server key file
+# Verify the client key file
 if [ ! -r "$KEY_FILE" ]; then
   KEY_REQD="yes"
-  read -n 1 -p "The server key ($KEY_FILE) does not exist. Create it? (y/n): "
+  read -n 1 -p "The client key ($KEY_FILE) does not exist. Create it? (y/n): "
   echo
   if [ $REPLY != "y" -a $REPLY != "Y" ]; then
-    error "Cannot continue without a server key."
+    error "Cannot continue without a client key."
   fi
 fi
 
@@ -91,11 +93,11 @@ openssl x509 -req -days 365 -set_serial $CA_SERIAL_NEXTVAL \
   -in "$CERT_CSR" -out "$CERT_FILE"
 chmod 444 "$CERT_FILE"
 
-# Apache configuration information
-echo
-echo "Finished! The following directives may be used with Apache."
-echo "  SSLCACertificateFile $CA_CERT_FILE"
-echo "  SSLCertificateFile $CERT_FILE"
-echo "  SSLCertificateKeyFile $KEY_FILE"
-echo
+# Export as PKCS#12
+openssl pkcs12 -export -clcerts -aes256 -in "$CERT_FILE" -inkey "$KEY_FILE" -out "$PKCS12_FILE"
+
+# Export as PEM
+openssl rsa -aes256 -in "$KEY_FILE" -out "$PEM_FILE"
+cat "$CERT_FILE" >> "$PEM_FILE"
+
 
