@@ -85,7 +85,7 @@ fi
 if [ "$REPLACE" == no ]; then
   if [ -f "$SSH_DIR/$SSH_PRIVATE_KEY" -o -f "$SSH_DIR/$SSH_PUBLIC_KEY" ]; then
     CREATE=no
-    echo "Existing key found: $SSH_DIR:$SSH_PRIVATE_KEY"
+    echo "Existing key found: $SSH_DIR/$SSH_PRIVATE_KEY"
   fi
 fi
 
